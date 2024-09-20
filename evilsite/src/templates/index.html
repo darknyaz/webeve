@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <h1>To upload new file <a href="upload">click</a></h1>
+    <h1>Uploaded files:</h1>
+    <table>
+        <tr>
+            <th>URL</th>
+        </tr>
+        {% for url in urls %}
+        <tr>
+            <td><a href="{{url}}">{{url.split('/', 1)[1]}}</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
