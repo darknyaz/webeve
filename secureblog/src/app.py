@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template, request, redirect
 import psycopg2
 import os
 
@@ -14,9 +14,25 @@ conn = psycopg2.connect(
     host=POSTGRES_HOST,
     port=5432
 )
+#conn.set_session(autocommit=True)
+
+def get_posts():
+    with conn.cursor() as cur:
+        cur.execute("SELECT text FROM post;")
+        return [x[0] for x in cur.fetchall()]
+
+
+def create_post(post):
+    with conn.cursor() as cur:
+        cur.execute(f"INSERT INTO post(text) VALUES ('{post}');")
+
 
 @app.route("/")
-def hello_world():
-    return "<p>Hello, World!<br>secret: one_billon_dollar_information</p>"
+def index():
+    return render_template("index.html", posts=get_posts())
 
 
+@app.route("/posts", methods=["POST"])
+def posts():
+    create_post(request.form["text"])
+    return redirect("/")

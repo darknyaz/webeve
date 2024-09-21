@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <h1>Create new post:</h1>
+    <form action="/posts" method="POST">
+        <label>Text: </label>
+        <input name="text" type="text" />
+        <input type="submit" value="Create" />
+    </form>
+    <h1>Posts:</h1><br>
+    {% for post in posts %}
+    <div>{{post}}</div>
+    {% endfor %}
+{% endblock %}

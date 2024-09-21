@@ -11,6 +11,7 @@ services:
       - db
     ports:
       - "8080:5000"
+    restart: always
 
   db:
     build:
