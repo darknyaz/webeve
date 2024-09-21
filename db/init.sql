@@ -1,0 +1,1 @@
+create table if not exists post(id serial, text text);
