@@ -4,6 +4,13 @@
 </head>
 <body>
     <h1>secureblog</h1>
+    <div>
+        {% if login %}
+        <a href="/">Blog</a> <a href="/logout">Logout</a>  Login as {{login}}
+        {% else %}
+        <a href="/">Blog</a> <a href="login">Login</a> <a href="register">Register</a>
+        {% endif %}
+    </div>
     {% block body %}{% endblock %}
 </body>
 </html>

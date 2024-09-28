@@ -9,6 +9,6 @@
     </form>
     <h1>Posts:</h1><br>
     {% for post in posts %}
-    <div>{{post}}</div>
+    <div>{{post[1]}}: {{post[0]}}</div>
     {% endfor %}
 {% endblock %}
