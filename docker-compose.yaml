@@ -9,9 +9,10 @@ services:
       - POSTGRES_HOST=db
     depends_on:
       - db
-    ports:
-      - "8080:5000"
     restart: always
+    networks:
+      webeve_net:
+        ipv4_address: 172.18.0.4
 
   db:
     build:
@@ -19,9 +20,21 @@ services:
     environment:
       - POSTGRES_USER=blog
       - POSTGRES_PASSWORD=blog123!
+    networks:
+      webeve_net:
+        ipv4_address: 172.18.0.2
 
   evilsite:
     build:
       context: evilsite
-    ports:
-      - "666:5000"
+    networks:
+      webeve_net:
+        ipv4_address: 172.18.0.3
+
+networks:
+  webeve_net:
+    driver: bridge
+    ipam:
+      config:
+       - subnet: 172.18.0.0/24 
+         gateway: 172.18.0.1

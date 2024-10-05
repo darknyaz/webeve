@@ -10,5 +10,5 @@ RUN pip3 install -r requirements.txt --break-system-packages
 
 EXPOSE 5000
 
-ENTRYPOINT ["flask", "--app", "app", "run", "--host", "0.0.0.0"]
+ENTRYPOINT ["flask", "--app", "app", "run", "--host", "0.0.0.0", "--port", "80"]
 
