@@ -1,12 +1,28 @@
 {% extends 'base.html' %}
 
+
+{% block head %}
+    <script>
+        async function sendPost() {
+            const text = document.getElementsByTagName("form")[0].getElementsByTagName("input")[0].value;
+            await fetch(
+                "/posts",
+                {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({"text": text})
+                }
+            ).then((res) => { document.location = "/"; });
+        }
+    </script>
+{% endblock %}
 {% block body %}
     <h1>Create new post:</h1>
-    <form action="/posts" method="POST">
+    <form>
         <label>Text: </label>
         <input name="text" type="text" />
-        <input type="submit" value="Create" />
     </form>
+    <button onclick="sendPost()">Create</button>
     <h1>Posts:</h1><br>
     {% for post in posts %}
     <div>{{post[1]}}: {{post[0]}}</div>

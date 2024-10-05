@@ -47,8 +47,9 @@ def index():
 
 @app.route("/posts", methods=["POST"])
 def posts():
+    text = request.get_json()["text"]
     if session.get("login") is not None:
-        create_post(request.form["text"], session["login"])
+        create_post(text, session["login"])
     return redirect("/")
 
 
