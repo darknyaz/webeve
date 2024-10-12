@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    {% if login %}
+        <p>Go to <a href="http://secureblog.su">secureblog</a> as {{login|safe}}</p>
+    {% else %}
+        <p>To start using the most secure blog go to <a href="http://secureblog.su">secureblog</a></p>
+    {% endif %}
+{% endblock %}

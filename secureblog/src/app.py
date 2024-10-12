@@ -1,10 +1,13 @@
 from flask import Flask, render_template, request, redirect, session
 import psycopg2
 import os
+import uuid
+
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
 app.config["SESSION_COOKIE_SAMESITE"] = "Strict"
+app.config["SESSION_COOKIE_DOMAIN"] = "secureblog.su"
 POSTGRES_USER = os.environ.get("POSTGRES_USER")
 POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
 POSTGRES_HOST = os.environ.get("POSTGRES_HOST")
@@ -16,6 +19,11 @@ conn = psycopg2.connect(
     host=POSTGRES_HOST,
     port=5432
 )
+
+
+def gen_acsrf():
+    return str(uuid.uuid4())
+
 
 def get_posts():
     with conn.cursor() as cur:
@@ -43,13 +51,16 @@ def create_user(login):
 
 @app.route("/")
 def index():
-    return render_template("index.html", posts=get_posts(), login=session.get("login"))
+    return render_template("index.html", posts=get_posts(), login=session.get("login"), acsrf=session.get("acsrf"))
 
 
 @app.route("/posts", methods=["POST"])
 def posts():
     if session.get("login") is not None:
-        create_post(request.form["text"], session["login"])
+        if request.form["acsrf"] == session.get("acsrf"):
+            create_post(request.form["text"], session["login"])
+        else:
+            print("Wrong Anti CSRF token!", flush=True)
     return redirect("/")
 
 
@@ -71,6 +82,7 @@ def login():
     login = request.form["login"]
     if get_user(login) is not None:
         session['login'] = login
+        session['acsrf'] = gen_acsrf()
     return redirect("/") 
 
 

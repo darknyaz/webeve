@@ -23,6 +23,14 @@ services:
     networks:
       webeve_net:
         ipv4_address: 172.18.0.2
+  
+  securebloglanding:
+    build:
+      context: securebloglanding
+    restart: always
+    networks:
+      webeve_net:
+        ipv4_address: 172.18.0.5
 
   evilsite:
     build:

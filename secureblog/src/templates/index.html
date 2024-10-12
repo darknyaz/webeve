@@ -6,9 +6,10 @@
         <label>Text: </label>
         <input name="text" type="text" />
         <input type="submit" value="Create" />
+        <input name="acsrf" type="text" value="{{acsrf}}" hidden />
     </form>
     <h1>Posts:</h1><br>
     {% for post in posts %}
-    <div>{{post[1]}}: {{post[0]}}</div>
+    <div>{{post[1]}}: {{post[0]|safe}}</div>
     {% endfor %}
 {% endblock %}
