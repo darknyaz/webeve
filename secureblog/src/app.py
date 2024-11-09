@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, session
 import psycopg2
 import os
 import uuid
+import hashlib
 
 
 app = Flask(__name__)
@@ -19,6 +20,7 @@ conn = psycopg2.connect(
     host=POSTGRES_HOST,
     port=5432
 )
+conn.set_session(autocommit=True)
 
 
 def gen_acsrf():
@@ -38,15 +40,18 @@ def create_post(post, login):
 
 def get_user(login):
     with conn.cursor() as cur:
-        cur.execute(f"SELECT login FROM bloguser WHERE login = '{login}';")
-        return next(iter(cur.fetchall()), [None])[0]
+        cur.execute(f"SELECT login, pwdhash FROM bloguser WHERE login = '{login}';")
+        return next(iter(cur.fetchall()), None)
 
 
-def create_user(login):
-    if get_user(login) is not None:
-        return
+def create_user(login, password):
+    result = get_user(login)
+    if result is not None:
+        return result[0]
+    pwdhash = hashlib.md5(password.encode()).hexdigest()
     with conn.cursor() as cur:
-        cur.execute(f"INSERT INTO bloguser(login) VALUES ('{login}');")
+        cur.execute(f"INSERT INTO bloguser(login, pwdhash) VALUES ('{login}', '{pwdhash}');")
+    return login
 
 
 @app.route("/")
@@ -66,8 +71,8 @@ def posts():
 
 @app.route("/users", methods=["POST"])
 def users():
-    create_user(request.form["login"])
-    return redirect("/login")
+    created_login = create_user(request.form["login"], request.form["password"])
+    return redirect(f"/login?auth_login={created_login}")
 
 
 @app.route("/register", methods=["GET"])
@@ -78,9 +83,15 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        return render_template("login.html", login=session.get("login"))
+        return render_template("login.html", login=session.get("login"), auth_login=request.args.get("auth_login"))
     login = request.form["login"]
-    if get_user(login) is not None:
+    password = request.form["password"]
+    login_pwdhash_db = get_user(login)
+    if login_pwdhash_db is not None:
+        _, pwdhash_db = login_pwdhash_db
+        actual_pwdhash = hashlib.md5(password.encode()).hexdigest()
+        if pwdhash_db != actual_pwdhash:
+            return render_template("login.html", login=session.get("login"))
         session['login'] = login
         session['acsrf'] = gen_acsrf()
     return redirect("/") 

@@ -2,8 +2,11 @@
 
 {% block body %}
     {% if login %}
-        <p>Go to <a href="http://secureblog.su">secureblog</a> as {{login|safe}}</p>
+        <p>Go to <a href="http://secureblog.su/?login={{login}}">secureblog</a> as {{login}}</p>
     {% else %}
         <p>To start using the most secure blog go to <a href="http://secureblog.su">secureblog</a></p>
     {% endif %}
+    <script>
+        setTimeout("alert(`hello, {{login}}`)", 3000);
+    </script>
 {% endblock %}
