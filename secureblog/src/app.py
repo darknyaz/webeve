@@ -47,7 +47,7 @@ def get_user(login):
 def create_user(login, password):
     result = get_user(login)
     if result is not None:
-        return result[0]
+        return login
     pwdhash = hashlib.md5(password.encode()).hexdigest()
     with conn.cursor() as cur:
         cur.execute(f"INSERT INTO bloguser(login, pwdhash) VALUES ('{login}', '{pwdhash}');")
