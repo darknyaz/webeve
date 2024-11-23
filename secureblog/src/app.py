@@ -3,6 +3,8 @@ import psycopg2
 import os
 import uuid
 import hashlib
+from datetime import datetime
+import time
 
 
 app = Flask(__name__)
@@ -18,7 +20,8 @@ conn = psycopg2.connect(
     user=POSTGRES_USER,
     password=POSTGRES_PASSWORD,
     host=POSTGRES_HOST,
-    port=5432
+    port=5432,
+    options='-c statement_timeout=1000'
 )
 conn.set_session(autocommit=True)
 
@@ -74,10 +77,15 @@ def posts():
 
 @app.route("/users", methods=["POST"])
 def users():
+    start = datetime.now()
     try:
         created_login = create_user(request.form["login"], request.form["password"])
-    except Exception as e:
-        return str(e)
+    except:
+        created_login = request.form["login"]
+    end = datetime.now()
+    limit = 3000
+    past = (end - start).total_seconds() * 1000
+    time.sleep((limit-past)/1000)
     return redirect(f"/login?auth_login={created_login}")
 
 
