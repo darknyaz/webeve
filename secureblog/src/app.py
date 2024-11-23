@@ -49,8 +49,11 @@ def create_user(login, password):
     if result is not None:
         return login
     pwdhash = hashlib.md5(password.encode()).hexdigest()
-    with conn.cursor() as cur:
-        cur.execute(f"INSERT INTO bloguser(login, pwdhash) VALUES ('{login}', '{pwdhash}');")
+    try:
+        with conn.cursor() as cur:
+            cur.execute(f"INSERT INTO bloguser(login, pwdhash) VALUES ('{login}', '{pwdhash}');")
+    except:
+        pass
     return login
 
 
@@ -71,7 +74,10 @@ def posts():
 
 @app.route("/users", methods=["POST"])
 def users():
-    created_login = create_user(request.form["login"], request.form["password"])
+    try:
+        created_login = create_user(request.form["login"], request.form["password"])
+    except Exception as e:
+        return str(e)
     return redirect(f"/login?auth_login={created_login}")
 
 
