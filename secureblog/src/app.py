@@ -21,7 +21,7 @@ conn = psycopg2.connect(
     password=POSTGRES_PASSWORD,
     host=POSTGRES_HOST,
     port=5432,
-    options='-c statement_timeout=1000'
+    options='-c statement_timeout=300'
 )
 conn.set_session(autocommit=True)
 
@@ -83,7 +83,7 @@ def users():
     except:
         created_login = request.form["login"]
     end = datetime.now()
-    limit = 3000
+    limit = 900
     past = (end - start).total_seconds() * 1000
     time.sleep((limit-past)/1000)
     return redirect(f"/login?auth_login={created_login}")
