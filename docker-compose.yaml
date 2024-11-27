@@ -23,6 +23,7 @@ services:
     networks:
       webeve_net:
         ipv4_address: 172.18.0.2
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr"]
   
   securebloglanding:
     build:
