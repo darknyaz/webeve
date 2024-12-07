@@ -1,14 +1,21 @@
 from flask import (
     Flask, render_template, send_from_directory, redirect, request,
-    url_for
+    url_for, Blueprint, current_app
 )
 import os
 
 
-app = Flask(__name__)
+evilsite_bp = Blueprint('evilsite', 'evilsite')
+
+
+def create_app():
+    app = Flask(__name__)
+    app.register_blueprint(evilsite_bp)
+    return app
+
 
 UPLOADS_FOLDERNAME = "uploads"
-UPLOADS_FOLDERPATH=os.path.join(app.root_path, UPLOADS_FOLDERNAME)
+UPLOADS_FOLDERPATH=os.path.join('/app', UPLOADS_FOLDERNAME)
 
 
 def get_upload_urls():
@@ -18,15 +25,15 @@ def get_upload_urls():
     return result
 
 
-@app.route("/")
+@evilsite_bp.route("/")
 def index():
     return render_template('index.html', urls=get_upload_urls())
 
-@app.route(f"/{UPLOADS_FOLDERNAME}/<path:name>")
+@evilsite_bp.route(f"/{UPLOADS_FOLDERNAME}/<path:name>")
 def download_file(name):
     return send_from_directory(UPLOADS_FOLDERNAME, name)
 
-@app.route("/upload", methods=["GET", "POST"])
+@evilsite_bp.route("/upload", methods=["GET", "POST"])
 def upload_file():
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -36,5 +43,5 @@ def upload_file():
             return redirect(request.url)
         if file and file.filename:
             file.save(os.path.join(UPLOADS_FOLDERPATH, file.filename))
-            return redirect(url_for('download_file', name=file.filename))
+            return redirect(url_for('evilsite.download_file', name=file.filename))
     return render_template('upload.html')
