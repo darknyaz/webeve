@@ -13,7 +13,7 @@ secureblog_bp = Blueprint('secureblog', 'secureblog')
 def create_app():
     app = Flask(__name__)
     app.secret_key = 'BAD_SECRET_KEY'
-    app.config["SESSION_COOKIE_SAMESITE"] = "None"
+    #app.config["SESSION_COOKIE_SAMESITE"] = "None"
     app.config["SESSION_COOKIE_DOMAIN"] = "secureblog.su"
     app.register_blueprint(secureblog_bp)
     return app
@@ -81,10 +81,10 @@ def index():
 @secureblog_bp.route("/posts", methods=["POST"])
 def posts():
     if session.get("login") is not None:
-        if request.form["acsrf"] == session.get("acsrf"):
-            create_post(request.form["text"], session["login"])
-        else:
-            print("Wrong Anti CSRF token!", flush=True)
+        #if request.form["acsrf"] == session.get("acsrf"):
+        create_post(request.form["text"], session["login"])
+        #else:
+        #    print("Wrong Anti CSRF token!", flush=True)
     return redirect("/")
 
 
