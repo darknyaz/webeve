@@ -5,6 +5,9 @@ import uuid
 import hashlib
 from datetime import datetime
 import time
+import imgkit
+import base64
+import re
 
 
 secureblog_bp = Blueprint('secureblog', 'secureblog')
@@ -73,6 +76,27 @@ def create_user(login, password):
     return login
 
 
+def decorate_link(link):
+    img = imgkit.from_url(link, False)
+    return base64.b64encode(img).decode()
+
+
+def decorate_post(text):
+    link_matched = list(re.finditer('[a-z]+://[^ ]+', text))
+    decorated_links = list(
+        f'{x.group()} <img src="data:image/jpg;base64,{decorate_link(x.group())}" style="width:300px;height:200px;"/>'
+        for x in link_matched)
+    result_text = []
+    pos = 0
+    for i in range(len(link_matched)):
+        m = link_matched[i]
+        result_text.append(text[pos:m.start()])
+        result_text.append(decorated_links[i]) 
+        pos = m.end()
+    result_text.append(text[pos:])
+    return ''.join(result_text)
+
+
 @secureblog_bp.route("/")
 def index():
     return render_template("index.html", posts=get_posts(), login=session.get("login"), acsrf=session.get("acsrf"))
@@ -82,7 +106,8 @@ def index():
 def posts():
     if session.get("login") is not None:
         #if request.form["acsrf"] == session.get("acsrf"):
-        create_post(request.form["text"], session["login"])
+        text = decorate_post(request.form["text"])
+        create_post(text, session["login"])
         #else:
         #    print("Wrong Anti CSRF token!", flush=True)
     return redirect("/")
