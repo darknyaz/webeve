@@ -7,12 +7,17 @@ services:
       - POSTGRES_USER=blog
       - POSTGRES_PASSWORD=blog123!
       - POSTGRES_HOST=db
+      - UWSGI_MAX_FD=4096
     depends_on:
       - db
     restart: always
     networks:
       webeve_net:
         ipv4_address: 172.18.0.4
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 10000
 
   db:
     build:
@@ -27,17 +32,29 @@ services:
   securebloglanding:
     build:
       context: securebloglanding
+    environment:
+      - UWSGI_MAX_FD=4096
     restart: always
     networks:
       webeve_net:
         ipv4_address: 172.18.0.5
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 10000
 
   evilsite:
     build:
       context: evilsite
+    environment:
+      - UWSGI_MAX_FD=4096
     networks:
       webeve_net:
         ipv4_address: 172.18.0.3
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 10000
 
 networks:
   webeve_net:
