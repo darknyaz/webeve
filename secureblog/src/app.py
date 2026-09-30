@@ -54,12 +54,12 @@ def get_posts():
 
 def create_post(post, login):
     with get_db().cursor() as cur:
-        cur.execute(f"INSERT INTO post(text, login) VALUES ('{post}', '{login}');")
+        cur.execute("INSERT INTO post(text, login) VALUES (%s, %s)", (post, login))
 
 
 def get_user(login):
     with get_db().cursor() as cur:
-        cur.execute(f"SELECT login, pwdhash FROM bloguser WHERE login = '{login}';")
+        cur.execute("SELECT login, pwdhash FROM bloguser WHERE login = %s", (login,))
         return next(iter(cur.fetchall()), None)
 
 
@@ -70,7 +70,7 @@ def create_user(login, password):
     pwdhash = hashlib.md5(password.encode()).hexdigest()
     try:
         with get_db().cursor() as cur:
-            cur.execute(f"INSERT INTO bloguser(login, pwdhash) VALUES ('{login}', '{pwdhash}');")
+            cur.execute("INSERT INTO bloguser(login, pwdhash) VALUES (%s, %s)", (login, pwdhash))
     except:
         pass
     return login
