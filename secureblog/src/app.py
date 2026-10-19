@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, session, g, Blueprint
+from markupsafe import escape
 import psycopg2
 import os
 import uuid
@@ -54,12 +55,12 @@ def get_posts():
 
 def create_post(post, login):
     with get_db().cursor() as cur:
-        cur.execute(f"INSERT INTO post(text, login) VALUES ('{post}', '{login}');")
+        cur.execute("INSERT INTO post(text, login) VALUES (%s, %s)", (post, login))
 
 
 def get_user(login):
     with get_db().cursor() as cur:
-        cur.execute(f"SELECT login, pwdhash FROM bloguser WHERE login = '{login}';")
+        cur.execute("SELECT login, pwdhash FROM bloguser WHERE login = %s", (login,))
         return next(iter(cur.fetchall()), None)
 
 
@@ -70,7 +71,7 @@ def create_user(login, password):
     pwdhash = hashlib.md5(password.encode()).hexdigest()
     try:
         with get_db().cursor() as cur:
-            cur.execute(f"INSERT INTO bloguser(login, pwdhash) VALUES ('{login}', '{pwdhash}');")
+            cur.execute("INSERT INTO bloguser(login, pwdhash) VALUES (%s, %s)", (login, pwdhash))
     except:
         pass
     return login
@@ -82,18 +83,18 @@ def decorate_link(link):
 
 
 def decorate_post(text):
-    link_matched = list(re.finditer('[a-z]+://[^ ]+', text))
+    link_matched = list(re.finditer('https?://[^ ]+', text))
     decorated_links = list(
-        f'{x.group()} <img src="data:image/jpg;base64,{decorate_link(x.group())}" style="width:300px;height:200px;"/>'
+        f'{escape(x.group())} <img src="data:image/jpg;base64,{decorate_link(x.group())}" style="width:300px;height:200px;"/>'
         for x in link_matched)
     result_text = []
     pos = 0
     for i in range(len(link_matched)):
         m = link_matched[i]
-        result_text.append(text[pos:m.start()])
+        result_text.append(escape(text[pos:m.start()]))
         result_text.append(decorated_links[i]) 
         pos = m.end()
-    result_text.append(text[pos:])
+    result_text.append(escape(text[pos:]))
     return ''.join(result_text)
 
 
