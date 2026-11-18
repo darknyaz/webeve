@@ -8,7 +8,7 @@ import time
 import imgkit
 import base64
 import re
-
+import hmac
 
 secureblog_bp = Blueprint('secureblog', 'secureblog')
 
@@ -16,7 +16,8 @@ secureblog_bp = Blueprint('secureblog', 'secureblog')
 def create_app():
     app = Flask(__name__)
     app.secret_key = 'BAD_SECRET_KEY'
-    #app.config["SESSION_COOKIE_SAMESITE"] = "None"
+    app.config["SESSION_COOKIE_SAMESITE"] = "None"
+    app.config["SESSION_COOKIE_SECURE"] = "True"
     app.config["SESSION_COOKIE_DOMAIN"] = "secureblog.su"
     app.register_blueprint(secureblog_bp)
     return app
@@ -104,12 +105,17 @@ def index():
 
 @secureblog_bp.route("/posts", methods=["POST"])
 def posts():
-    if session.get("login") is not None:
-        #if request.form["acsrf"] == session.get("acsrf"):
-        text = decorate_post(request.form["text"])
-        create_post(text, session["login"])
-        #else:
-        #    print("Wrong Anti CSRF token!", flush=True)
+     if session.get("login") is None:
+        return redirect("/login")
+
+    expected = session.get("acsrf")
+    provided = request.form.get("acsrf", "")
+
+    if not expected or not hmac.compare_digest(provided.encode(), expected.encode()):
+        return "Invalid CSRF token", 403
+
+    text = decorate_post(request.form["text"])
+    create_post(text, session["login"])
     return redirect("/")
 
 
